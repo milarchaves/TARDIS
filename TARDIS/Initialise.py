@@ -1,3 +1,16 @@
+#!/usr/lib/python3
+
+# Description
+###############################################################################
+'''
+This file contains variables and functions that are used to initialise TARDIS.\n
+All scripts that use TARDIS must import this file.
+
+They are imported as:
+
+from TARDIS.Initialise import *
+'''
+
 # Imports
 ###############################################################################
 import argparse
@@ -19,35 +32,33 @@ Github: https://github.com/milarchaves
 This project is licensed under Creative Commons license (CC-BY-4.0)
 
 '''
-
-# Description
+# Splash, version & clear tmp
 ###############################################################################
-description = tw.dedent("""
-    \033[1;93m+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+  \033[1;95m   _____  _    ____  ____ ___ ____  
-|_   _|/ \  |  _ \|  _ \_ _/ ___| 
-  | | / _ \ | |_) | | | | |\___ \ 
-  | |/ ___ \|  _ <| |_| | | ___) |
-  |_/_/   \_\_| \_\____/___|____/ 
-                                  
-    \033[1;93m+-+-+-+-+-+-+-+-+-+-+-+-+-+
+TARDISVersion = "1.0"
+
+description = tw.dedent("""\033[1;93m
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    \033[1;95m
-                  “There’s always something to look at if you open your eyes!”
-    \033[1;93m
-                                 - The Fifth Doctor
-    \033[1;0m
+    +-+-+-+-+-+-+-+-+-+- \033[1;96m _____  _    ____  ____ ___ ____  \033[1;93m-+-+-+-+-+-+-+-+-+-+  
+    +-+-+-+-+-+-+-+-+-+- \033[1;96m|_   _|/ \  |  _ \|  _ \_ _/ ___| \033[1;93m-+-+-+-+-+-+-+-+-+-+ 
+    +-+-+-+-+-+-+-+-+-+- \033[1;96m  | | / _ \ | |_) | | | | |\___   \033[1;93m-+-+-+-+-+-+-+-+-+-+ 
+    +-+-+-+-+-+-+-+-+-+- \033[1;96m  | |/ ___ \|  _ <| |_| | | ___) |\033[1;93m-+-+-+-+-+-+-+-+-+-+
+    +-+-+-+-+-+-+-+-+-+- \033[1;96m  |_/_/   \_\_| \_\____/___|____/ \033[1;93m-+-+-+-+-+-+-+-+-+-+
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+\033[1;0m
+      “There’s always something to look at if you open your eyes!”
+\033[1;0m
+                                                - The Fifth Doctor
+\033[1;0m
       Copyright (C) 2022  Chaves, C; Torres, P.H.M.
-
-    \033[1;93m
-                      [Federal University of Rio de Janeiro]
-
-    \033[1;0m
+\033[1;95m
+                  [The Federal University of Rio de Janeiro]
+\033[1;0m
           This program comes with ABSOLUTELY NO WARRANTY
-
-      TARDIS uses metabolic network moddeling to identify potencial targets for drug design against infectious diseases. 
-     \033[1;0m+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-          """)
+\033[1;0m
+          TARDIS uses genome-scale metabolic network moddeling to find new targets for antimicrobial drug-design
+\033[1;93m
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+\033[1;0m""")
 
 epilogue = tw.dedent("""
     TARDIS generates a summary file, whose columns are ordered as follows:
@@ -62,12 +73,26 @@ epilogue = tw.dedent("""
 ###############################################################################
 
 
-def create_tardis_conf():
-    conf_file = "tardis.cfg"
+def create_tardis_conf() -> None:
+    '''Creates the 'TARDIS.conf' file.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    None
+    '''
+    conf_file = "TARDIS.conf"
     with open(conf_file, 'w') as cf:
-        cf.write(tw.dedent("""
+        cf.write(tw.dedent(
         # CarveMe Executable
-        carveme_exe = 
+        carveme_exe = "/home/camila/anaconda3/envs/tardis/bin/carve"
 
         # FindCP Executable
         findcp_exe = """))
@@ -76,6 +101,17 @@ def create_tardis_conf():
 
 # Define Global Variables
 ###############################################################################
+
+# Dictionary for the output colors
+clrs = {
+    "r": "\033[1;91m",  # red
+    "g": "\033[1;92m",  # green
+    "y": "\033[1;93m",  # yellow
+    "b": "\033[1;94m",  # blue
+    "p": "\033[1;95m",  # purple
+    "c": "\033[1;96m",  # cyan
+    "n": "\033[1;0m"   # default
+    }
 
 # Parse command line arguments
 ###############################################################################
@@ -86,7 +122,7 @@ def argument_parsing():
                                      epilog=epilogue)
 
     parser.add_argument('--version', action='version',
-                    version='%(prog)s 1.0')
+                    version=f'%(prog)s {TARDISVersion}')
 
     parser.add_argument('-f', '--file',
                         dest='input_file',
