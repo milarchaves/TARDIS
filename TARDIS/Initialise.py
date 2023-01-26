@@ -90,7 +90,7 @@ def create_tardis_conf() -> None:
     '''
     conf_file = "TARDIS.conf"
     with open(conf_file, 'w') as cf:
-        cf.write(tw.dedent(
+        cf.write(tw.dedent("""
         # CarveMe Executable
         carveme_exe = "/home/camila/anaconda3/envs/tardis/bin/carve"
 
