@@ -37,13 +37,14 @@ This project is licensed under Creative Commons license (CC-BY-4.0)
 TARDISVersion = "1.0"
 
 description = tw.dedent("""\033[1;93m
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    +-+-+-+-+-+-+-+-+-+- \033[1;96m _____  _    ____  ____ ___ ____  \033[1;93m-+-+-+-+-+-+-+-+-+-+  
-    +-+-+-+-+-+-+-+-+-+- \033[1;96m|_   _|/ \  |  _ \|  _ \_ _/ ___| \033[1;93m-+-+-+-+-+-+-+-+-+-+ 
-    +-+-+-+-+-+-+-+-+-+- \033[1;96m  | | / _ \ | |_) | | | | |\___   \033[1;93m-+-+-+-+-+-+-+-+-+-+ 
-    +-+-+-+-+-+-+-+-+-+- \033[1;96m  | |/ ___ \|  _ <| |_| | | ___) |\033[1;93m-+-+-+-+-+-+-+-+-+-+
-    +-+-+-+-+-+-+-+-+-+- \033[1;96m  |_/_/   \_\_| \_\____/___|____/ \033[1;93m-+-+-+-+-+-+-+-+-+-+
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-+-+
+    +-+-+-+-+-+-+-+-+-+-\033[1;96m  _____  _    ____  ____ ___ ____   \033[1;93m-+-+-+-+-+-+-+-+-+-+  
+    +-+-+-+-+-+-+-+-+-+-\033[1;96m |_   _|/ \  |  _ \|  _ \_ _/ ___|  \033[1;93m-+-+-+-+-+-+-+-+-+-+ 
+    +-+-+-+-+-+-+-+-+-+-\033[1;96m   | | / _ \ | |_) | | | | |\___    \033[1;93m-+-+-+-+-+-+-+-+-+-+ 
+    +-+-+-+-+-+-+-+-+-+-\033[1;96m   | |/ ___ \|  _ <| |_| | | ___) | \033[1;93m-+-+-+-+-+-+-+-+-+-+
+    +-+-+-+-+-+-+-+-+-+-\033[1;96m   |_/_/   \_\_| \_\____/___|____/  \033[1;93m-+-+-+-+-+-+-+-+-+-+
+    +-+-+-+-+-+-+-+-+-+-\033[1;96m                                    \033[1;93m-+-+-+-+-+-+-+-+-+-+
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-+-+
 \033[1;0m
       “There’s always something to look at if you open your eyes!”
 \033[1;0m
@@ -56,8 +57,6 @@ description = tw.dedent("""\033[1;93m
           This program comes with ABSOLUTELY NO WARRANTY
 \033[1;0m
           TARDIS uses genome-scale metabolic network moddeling to find new targets for antimicrobial drug-design
-\033[1;93m
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 \033[1;0m""")
 
 epilogue = tw.dedent("""
@@ -121,8 +120,6 @@ def argument_parsing():
                                      description=description,
                                      epilog=epilogue)
 
-    parser.add_argument('--version', action='version',
-                    version=f'%(prog)s {TARDISVersion}')
 
     parser.add_argument('-f', '--file',
                         dest='input_file',
@@ -147,11 +144,16 @@ def argument_parsing():
                         metavar='',
                         help='Configuration file containing external executable paths')
 
+    parser.add_argument('-vn', '--version', action='version',
+                    version=f'%(prog)s {TARDISVersion}')
+
     initial_args = parser.parse_args()
 
     return initial_args
 
 initial_args = argument_parsing()
+
+print(description)
 
 
 
