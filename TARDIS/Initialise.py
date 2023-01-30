@@ -158,4 +158,5 @@ print(description)
 
 
 
+
 # Criar classe proteína com nome, gene e sequência 
