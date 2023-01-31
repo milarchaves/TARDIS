@@ -64,11 +64,9 @@ def create_map (input):
     '''
     if input is None:
         print(clrs['r']+'ERROR: '+clrs['n']+'No input file was provided. Please use the'+clrs['y']+' -f '+clrs['n']+'flag to provide the proteome file.')
-    print(input)
     if input.endswith('.faa'):
         if initial_args.verbosity > 0:
             print(clrs['g']+'Input file provided. Creating metabolic map...'+clrs['n'])
-        print(" ".join(["/home/camila/anaconda3/envs/tardis/bin/carve", input]))
         subprocess.run(["carve", input])
         model = CobraMetabolicModel(str(input).replace('.faa', '.xml'))
     else:

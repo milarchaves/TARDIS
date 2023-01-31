@@ -53,7 +53,7 @@ def main():
     
     genes = list(genes)
     for i in range(len(genes)):
-        output = pd.concat([output, pd.DataFrame([['', '', genes[i], '', '']], columns=['Protein', 'Sequence', 'Essencial gene', 'Chokepoint', 'Homologue'])], ignore_index=True)
+        output = pd.concat([output, pd.DataFrame([['', '', genes[i], '', '']], columns=['Protein', 'Sequence', 'Essential gene', 'Chokepoint', 'Homologue'])], ignore_index=True)
 
     #update the output dataframe
     with open(input, 'r') as f:
@@ -68,9 +68,8 @@ def main():
                         if not line:
                             break
                 if name in output['Essencial gene']:
-                    output = pd.concat([output, pd.DataFrame([[name, sequence, '', '', '']], columns=['Protein', 'Sequence', 'Essencial gene', 'Chokepoint', 'Homologue'])], ignore_index=True)
-
-    print(output)            
+                    output = pd.concat([output, pd.DataFrame([[name, sequence, '', '', '']], columns=['Protein', 'Sequence', 'Essential gene', 'Chokepoint', 'Homologue'])], ignore_index=True)
+           
     '''
     for gene in model.genes:
         print (gene)
@@ -80,7 +79,7 @@ def main():
             output.loc[output['Protein'] == gene.id, 'Chokepoint'] = 'Yes'
     '''
     #save output dataframe
-    #output.to_csv(output, sep='\t', index=False)
+    output.to_csv('output.csv', sep='\t', index=False)
 
 # Execute
 ###############################################################################
