@@ -3,6 +3,7 @@
 # Imports
 ###############################################################################
 from TARDIS.Initialise import *
+from FindTargets import *
 import subprocess
 import sys
 import os
@@ -28,26 +29,34 @@ This project is licensed under Creative Commons license (CC-BY-4.0)
 # Description
 ###############################################################################
 
-# Classes
+# Global variables
 ###############################################################################
-
+global output
 # Functions
 ###############################################################################
 
 # Main Function
 ###############################################################################
 def main():
-    output = pd.DataFrame(columns=['Protein', 'Sequence', 'Essencial gene', 'Chokepoint', 'Homologue'])
-    # Open input file and create the metabolic map
-    if initial_args.input_file is None:
-        print(clrs['r']+'ERROR: '+clrs['n']+'No input file was provided. Please use the'+clrs['y']+' -f '+clrs['n']+'flag to provide a file with the paths of the genomes/proteomes.')
-    print(initial_args.input_file)
-    if initial_args.input_file.endswith('.faa'):
-        if initial_args.verbosity > 0:
-            print(clrs['g']+'Input file provided. Creating metabolic map...'+clrs['n'])
-        print(" ".join(["/home/camila/anaconda3/envs/tardis/bin/carve", initial_args.input_file]))
-        subprocess.run(["carve", initial_args.input_file], capture_output=True)
-        with open(initial_args.input_file, 'r') as f:
+    # Create dataframe output
+    output =pd.DataFrame(columns=['Protein', 'Sequence', 'Essential gene', 'Chokepoint', 'Homologue'])
+    #create metabolic map
+    input = initial_args.input_file
+    
+    map = create_map(input)
+    #find targets
+    genes = find_essential_genes(map)
+    #find chokepoints
+    chokepoints = find_chokepoint_reactions(map)
+
+    
+    
+    genes = list(genes)
+    for i in range(len(genes)):
+        output = pd.concat([output, pd.DataFrame([['', '', genes[i], '', '']], columns=['Protein', 'Sequence', 'Essencial gene', 'Chokepoint', 'Homologue'])], ignore_index=True)
+
+    #update the output dataframe
+    with open(input, 'r') as f:
             for line in f:
                 sequence = ''
                 if line[0]=='>':
@@ -58,9 +67,21 @@ def main():
                         line = f.readline()
                         if not line:
                             break
-                output = pd.concat([output, pd.DataFrame([[name, sequence, '', '', '']], columns=['Protein', 'Sequence', 'Essencial gene', 'Chokepoint', 'Homologue'])], ignore_index=True)
-                
-    output.to_csv('output.csv', index=False)
+                if name in output['Essencial gene']:
+                    output = pd.concat([output, pd.DataFrame([[name, sequence, '', '', '']], columns=['Protein', 'Sequence', 'Essencial gene', 'Chokepoint', 'Homologue'])], ignore_index=True)
+
+    print(output)            
+    '''
+    for gene in model.genes:
+        print (gene)
+        if gene.id in essential_genes:
+            output.loc[output['Protein'] == gene.id, 'Essential gene'] = 'Yes'
+        if gene.id in chokepoints:
+            output.loc[output['Protein'] == gene.id, 'Chokepoint'] = 'Yes'
+    '''
+    #save output dataframe
+    #output.to_csv(output, sep='\t', index=False)
+
 # Execute
 ###############################################################################
 if __name__ == "__main__":
