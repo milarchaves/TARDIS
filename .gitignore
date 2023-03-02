@@ -1,4 +1,4 @@
-# OCDocker .gitignore
+# TARDIS .gitignore
 
 ##########################
 # General python ignores #
@@ -188,16 +188,17 @@ tmp/
 
 # Do not upload .cfg files
 *.cfg
-*OCDocker.cfg*
 
 # Ignore nohup.out
 *nohup.out
-
-# Ignore the rundock script because it is meant to stay only locally (temporary entry)
-rundock.py
  
 # Ignore vscode files
 .vscode/
 
 # Ignore docs (for now)
 docs/
+TARDIS/output.xls
+output.csv
+d_radiodurans.xml
+aureus.xml
+TARDIS/essencial-genes.py

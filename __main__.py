@@ -39,44 +39,33 @@ global output
 ###############################################################################
 def main():
     # Create dataframe output
-    output =pd.DataFrame(columns=['Protein', 'Sequence', 'Essential gene', 'Chokepoint', 'Homologue'])
+    output =pd.DataFrame(columns=['Essential genes', 'Chokepoint Reactions', 'Essential chokepoint genes'])
     #create metabolic map
     input = initial_args.input_file
     
     map = create_map(input)
     #find targets
     genes = find_essential_genes(map)
+    
     #find chokepoints
     chokepoints = find_chokepoint_reactions(map)
 
-    
+    #find Essential chokepoint genes
+    essential_CP =find_essential_chokepoint_reactions(map) 
     
     genes = list(genes)
-    for i in range(len(genes)):
-        output = pd.concat([output, pd.DataFrame([['', '', genes[i], '', '']], columns=['Protein', 'Sequence', 'Essential gene', 'Chokepoint', 'Homologue'])], ignore_index=True)
+    chokepoints = list(chokepoints)
+    essential_CP = list(essential_CP)
 
-    #update the output dataframe
-    with open(input, 'r') as f:
-            for line in f:
-                sequence = ''
-                if line[0]=='>':
-                    name = line.split()[0].replace('>', '').replace(' ','_')
-                else:
-                    while line[0]!='>':
-                        sequence += line
-                        line = f.readline()
-                        if not line:
-                            break
-                if name in output['Essencial gene']:
-                    output = pd.concat([output, pd.DataFrame([[name, sequence, '', '', '']], columns=['Protein', 'Sequence', 'Essential gene', 'Chokepoint', 'Homologue'])], ignore_index=True)
-           
+    for i in range(len(genes)+len(chokepoints)):
+        output = pd.concat([output, pd.DataFrame([[genes[i], chokepoints[i], essential_CP[i]]], columns=['Essential genes', 'Chokepoint Reactions', 'Essential chokepoint genes'])])
+
     '''
-    for gene in model.genes:
-        print (gene)
-        if gene.id in essential_genes:
-            output.loc[output['Protein'] == gene.id, 'Essential gene'] = 'Yes'
-        if gene.id in chokepoints:
-            output.loc[output['Protein'] == gene.id, 'Chokepoint'] = 'Yes'
+    for j in range(len(chokepoints)):
+        output = pd.concat([output, pd.DataFrame([['', chokepoints[j], '']], columns=['Essential genes', 'Chokepoint Reactions', 'Essential chokepoint genes'])])
+
+    for k in range(len(essential_CP)):
+        output = pd.concat([output, pd.DataFrame([['', '', essential_CP[k]]], columns=['Essential genes', 'Chokepoint Reactions', 'Essential chokepoint genes'])])
     '''
     #save output dataframe
     output.to_csv('output.csv', sep='\t', index=False)

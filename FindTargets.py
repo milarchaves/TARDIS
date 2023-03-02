@@ -18,14 +18,9 @@ A protein is considered a potential target if it fits all the criteria above.
 ###############################################################################
 from TARDIS.Initialise import *
 import subprocess
-import sys
-import os
-import pandas as pd
 from Bio.Blast import NCBIWWW
 from Bio.Blast import NCBIXML
-from findCPcore import CobraMetabolicModel
-from cobra.flux_analysis import (single_gene_deletion, single_reaction_deletion, double_gene_deletion, double_reaction_deletion)
-from cobra.flux_analysis import flux_variability_analysis
+from contrabass.core import CobraMetabolicModel
 
 # License
 ###############################################################################
@@ -88,11 +83,7 @@ def find_essential_genes (model):
     ------
     None
    '''
-    if initial_args.verbosity > 0:
-        print(clrs['g']+'Finding essential genes...'+clrs['n'])
-    #maximize flux through the objective reactions
-    #model.optimize()
-
+    
     # update flux bounds with FVA
     model.fva(update_flux=True)
 
@@ -101,6 +92,11 @@ def find_essential_genes (model):
 
     # get essencial genes
     genes = model.essential_genes()
+    
+    if initial_args.verbosity > 0:
+        print(clrs['g']+'Finding essential genes...'+clrs['n'])
+        model.print_essential_genes()
+
     return genes
     
 
@@ -113,26 +109,77 @@ def find_chokepoint_reactions (model):
 
     Returns
     -------
-    Chokepoint reactions
+    Chokepoint reactions list
 
     Raises
     ------
     None
    '''
-    if initial_args.verbosity > 0:
-        print(clrs['g']+'Finding chokepoint reactions...'+clrs['n'])
-    
-    #maximize flux through the objective reactions
-    #model.optimize()
-
+         
     # update flux bounds with FVA
     model.fva(update_flux=True)
 
-    # compute chokepoints
-    model.find_chokepoints()
+   # get chokepoints
+    model.find_chokepoints(exclude_dead_reactions=True)
+    chokepoints = model.chokepoints()
+
+    chokepoint_list = []
+    for i in range(len(chokepoints)):
+        if chokepoints[i][0].id not in chokepoint_list:
+            chokepoint_list.append(chokepoints[i][0].id)
+
+    if initial_args.verbosity > 0:
+        print(clrs['g']+'Finding chokepoint reactions...'+clrs['n'])
+        model.print_chokepoints()
+
+     # remove duplicates
+    chokepoint_list = list(set(chokepoint_list))
 
     # get chokepoints
-    return model.chokepoints()
+    return chokepoint_list
+
+def find_essential_chokepoint_reactions (model):
+    '''Find essential genes reactions in the metabolic map
+
+    Parameters
+    ----------
+    Metabolic map in SBML format (.xml)
+
+    Returns
+    -------
+    essential genes reactions list
+
+    Raises
+    ------
+    None
+   '''
+    
+    # update flux bounds with FVA
+    model.fva(update_flux=True)
+
+    #find chokepoints
+    model.find_chokepoints(exclude_dead_reactions=True)
+    chokepoints = model.chokepoints()
+
+    #find essential genes
+    model.find_essential_genes_1()
+    genes = list(model.essential_genes())
+   
+    # get essential_chokepoint_reactions
+    essential_CP = []
+    for i in range(len(chokepoints)):
+        for j in range(len(genes)):
+            if chokepoints[i][0].gene_reaction_rule == genes[j].id:
+                essential_CP.append(genes[j].id)
+
+    # remove duplicates
+    essential_CP = list(set(essential_CP))
+
+    if initial_args.verbosity > 0:
+        print(clrs['g']+'Finding essential genes reactions...'+clrs['n'])
+        print(essential_CP)
+   
+    return essential_CP
 
 def homology_search (model, output):
     '''Find homology in human genome

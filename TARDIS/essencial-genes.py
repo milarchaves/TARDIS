@@ -26,8 +26,21 @@ model.fva(update_flux=True)
 # compute chokepoints
 model.find_chokepoints()
 
+
 # get chokepoints
-model.chokepoints()
+model.find_chokepoints(exclude_dead_reactions=True)
+chokepoints = model.chokepoints()
+chokepoint_list = []
+for i in range(len(chokepoints)):
+    reaction = chokepoint[i].__str__().split(' ')
+    chokepoint_list.append(reaction[1])
+
+chokepoint_list
+
+dir(chokepoints)
+model.find_essential_genes_reactions()
+
+model.essential_genes_reactions()
 
 model.find_essential_genes_1()
 
@@ -49,6 +62,8 @@ def callback_print(message, arg1, arg2):
     print(arg1 + message)
 
 facadeUtils = FacadeUtils()
+
+dir(FacadeUtils())
 spreadsheet = facadeUtils.run_summary_model('/home/camila/LMDM/Mestrado/TARDIS/test/d_radiodurans.xml', callback_print, "LOG:", None, fraction=0.95)
 facadeUtils.save_spreadsheet("output.xls", spreadsheet)
 
