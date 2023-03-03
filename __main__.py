@@ -57,16 +57,10 @@ def main():
     chokepoints = list(chokepoints)
     essential_CP = list(essential_CP)
 
-    for i in range(len(genes)+len(chokepoints)):
-        output = pd.concat([output, pd.DataFrame([[genes[i], chokepoints[i], essential_CP[i]]], columns=['Essential genes', 'Chokepoint Reactions', 'Essential chokepoint genes'])])
+    frame = {'Essential genes': genes, 'Chokepoint Reactions': chokepoints, 'Essential chokepoint genes': essential_CP}
 
-    '''
-    for j in range(len(chokepoints)):
-        output = pd.concat([output, pd.DataFrame([['', chokepoints[j], '']], columns=['Essential genes', 'Chokepoint Reactions', 'Essential chokepoint genes'])])
-
-    for k in range(len(essential_CP)):
-        output = pd.concat([output, pd.DataFrame([['', '', essential_CP[k]]], columns=['Essential genes', 'Chokepoint Reactions', 'Essential chokepoint genes'])])
-    '''
+    output =pd.DataFrame(frame)
+    
     #save output dataframe
     output.to_csv('output.csv', sep='\t', index=False)
 
