@@ -4,10 +4,10 @@
 ###############################################################################
 from TARDIS.Initialise import *
 from FindTargets import *
-import subprocess
 import sys
 import os
 import pandas as pd
+from Bio import SeqIO
 
 # License
 ###############################################################################
@@ -38,8 +38,6 @@ global output
 # Main Function
 ###############################################################################
 def main():
-    # Create dataframe output
-    output =pd.DataFrame(columns=['Essential genes', 'Chokepoint Reactions', 'Essential chokepoint genes'])
     #create metabolic map
     input = initial_args.input_file
     
@@ -53,18 +51,46 @@ def main():
     #find Essential chokepoint genes
     essential_CP =find_essential_chokepoint_reactions(map) 
     
-    genes = list(genes)
-    chokepoints = list(chokepoints)
-    essential_CP = list(essential_CP)
+    genes_df = pd.Series(list(genes))
+    chokepoints_df = pd.Series(list(chokepoints))
+    essential_CP_df = pd.Series(list(essential_CP))
 
-    frame = {'Essential genes': genes, 'Chokepoint Reactions': chokepoints, 'Essential chokepoint genes': essential_CP}
+    frame = {'Essential genes': genes_df, 'Chokepoint Reactions': chokepoints_df, 'Essential chokepoint genes': essential_CP_df}
 
-    output =pd.DataFrame(frame)
-    
-    
-
+    output = pd.DataFrame(frame)
     #save output dataframe
     output.to_csv('output.csv', sep='\t', index=False)
+    
+
+    ''' Não sei aaaaaaaaaaaaaaaaaaaaaa continuar daqui depois!!!!!! '''
+
+
+    with open(input, 'r'):
+        #seqs = SeqIO.to_dict(SeqIO.parse(input, "fasta"))
+        seqs = list(SeqIO.parse(input, "fasta"))
+    
+    
+    if not os.path.isdir('targets'):
+        os.mkdir('targets')
+    for seq in seqs:
+        print(seq.seq)
+        if seq.id.replace('|', '_') in essential_CP:
+            try:
+                name = os.path.join('targets', seq.id.split('|')[1] + '.fasta')
+                with open(name, 'a') as f:
+                    f.write('>' + seq.id + '\n' + seq.seq)
+                    #f.write(seq.seq)
+                if initial_args.verbosity > 0:
+                    print(clrs['g']+'Targets sequences...'+clrs['n'])
+                    print(seq.id)
+                    print(seq.seq)
+                    print('\n')            
+            except:
+                pass
+        #print(str(gene).replace('_','|'))
+  
+
+        
 
 # Execute
 ###############################################################################
