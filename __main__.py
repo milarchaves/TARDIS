@@ -61,25 +61,19 @@ def main():
     #save output dataframe
     output.to_csv('output.csv', sep='\t', index=False)
     
-
-    ''' Não sei aaaaaaaaaaaaaaaaaaaaaa continuar daqui depois!!!!!! '''
-
-
+    #Retrieve targets sequences
     with open(input, 'r'):
-        #seqs = SeqIO.to_dict(SeqIO.parse(input, "fasta"))
         seqs = list(SeqIO.parse(input, "fasta"))
     
     
     if not os.path.isdir('targets'):
         os.mkdir('targets')
     for seq in seqs:
-        print(seq.seq)
         if seq.id.replace('|', '_') in essential_CP:
             try:
                 name = os.path.join('targets', seq.id.split('|')[1] + '.fasta')
                 with open(name, 'a') as f:
-                    f.write('>' + seq.id + '\n' + seq.seq)
-                    #f.write(seq.seq)
+                    f.write('>' + seq.id + '\n' + str(seq.seq))
                 if initial_args.verbosity > 0:
                     print(clrs['g']+'Targets sequences...'+clrs['n'])
                     print(seq.id)
@@ -87,11 +81,7 @@ def main():
                     print('\n')            
             except:
                 pass
-        #print(str(gene).replace('_','|'))
   
-
-        
-
 # Execute
 ###############################################################################
 if __name__ == "__main__":
