@@ -63,7 +63,10 @@ def create_map (input):
         if initial_args.verbosity > 0:
             print(clrs['g']+'Input file provided. Creating metabolic map...'+clrs['n'])
         subprocess.run(["carve", input])
-        model = CobraMetabolicModel(str(input).replace('.faa', '.xml'))
+        if input.endswith('.faa'):
+            model = CobraMetabolicModel(str(input).replace('.faa', '.xml'))
+        else:
+            model = CobraMetabolicModel(str(input).replace('.fasta', '.xml'))
     else:
         print(clrs['r']+'ERROR: '+clrs['n']+'The input file must be in FASTA format (.faa).')
     return model
@@ -176,7 +179,7 @@ def find_essential_chokepoint_reactions (model):
     essential_CP = list(set(essential_CP))
 
     if initial_args.verbosity > 0:
-        print(clrs['g']+'Finding essential genes reactions...'+clrs['n'])
+        print(clrs['g']+'Essential chokepoint genes...'+clrs['n'])
         print(essential_CP)
    
     return essential_CP
