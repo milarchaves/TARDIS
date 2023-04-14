@@ -1,23 +1,36 @@
-import sys
 import os
-from Bio.Blast import NCBIWWW
+import subprocess
 from Bio.Blast import NCBIXML
 
-for out_dir in os.listdir(os.getcwd()):
-    if os.path.isdir(out_dir):
-        os.getcwd(out_dir)
-        sequence_data = open(out_dir + '_CHOIR_MonomerSequence.fasta').read()
-        result_handle = NCBIWWW.qblast("blastp", "nr", sequence_data, entrez_query='txid9606[ORGN]')
-        with open('results.xml', 'a') as save_file:
-            blast_results = result_handle.read()
-            save_file.write(blast_results)
+# set the path to the local blast database
+db = '/home/camila/LMDM/Mestrado/TARDIS/TARDIS/humanProtDB/humanProtDB'
 
-        E_VALUE_THRESH = 1e-20
-        for record in NCBIXML.parse(open("results.xml")):
-            if record.alignments:
+# set the directory containing the fasta files
+targets = '/home/camila/LMDM/Mestrado/TARDIS/ESKAPE/targets_Pseudomonas_aeruginosa'
+
+# set the e-value threshold
+evalue_thresh = 0.04
+
+# set the output file name
+output_file = "blast_results.xml"
+
+# perform blastp on all fasta files in the directory
+for out_dir in os.listdir(targets):
+    if out_dir.endswith('.fasta'):
+        print("Blasting " + out_dir)
+        query_file = os.path.join(targets, out_dir)
+        cmd = "blastp -query " + query_file + " -db " + db + " -out " + output_file + " -evalue 0.001 -outfmt 5"
+        subprocess.run(cmd, shell=True)
+
+
+# Iterate through the BLAST records
+for record in NCBIXML.parse(open(output_file)):
+    # Iterate through the alignments
+    for alignment in record.alignments:
+        # Iterate through the HSPs
+        for hsp in alignment.hsps:
+            # Check if the HSP meets the e-value threshold
+            if hsp.expect < evalue_thresh:
                 print("\n")
                 print("query: %s" % record.query[:100])
-                for align in record.alignments:
-                    for hsp in align.hsps:
-                        if hsp.expect < E_VALUE_THRESH:
-                            print("match: %s " % align.title[:100])
+                print("Match: {}, E-value: {}".format(alignment.title, hsp.expect))

@@ -197,6 +197,9 @@ tmp/
 
 # Ignore docs (for now)
 docs/
+*.xml
+*.fasta.gz
+humanProtDB/
 TARDIS/output.xls
 output.csv
 d_radiodurans.xml
