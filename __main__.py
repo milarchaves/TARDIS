@@ -42,8 +42,13 @@ def main():
     input = initial_args.input_file
     
     map = create_map(input)
-    #find targets
+
+    #find essential genes
     genes = find_essential_genes(map)
+    #save essential genes in a txt file with the same name as the input file
+    with open(input.replace(".fasta", ".txt"), 'w') as f:
+        for item in genes:
+            f.write("%s\n" % item)
     
     #find chokepoints
     chokepoints = find_chokepoint_reactions(map)
