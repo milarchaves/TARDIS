@@ -4,7 +4,6 @@
 ###############################################################################
 from TARDIS.Initialise import *
 from FindTargets import *
-import sys
 import os
 import pandas as pd
 from Bio import SeqIO
@@ -70,9 +69,10 @@ def main():
     with open(input, 'r'):
         seqs = list(SeqIO.parse(input, "fasta"))
     
-    
-    if not os.path.isdir('targets'):
-        os.mkdir('targets')
+    #create a directory to save the targets sequences
+    namedir = input.replace(".fasta", "")
+    if not os.path.isdir(namedir):
+        os.mkdir(namedir)
     for seq in seqs:
         if seq.id.replace('|', '_') in essential_CP:
             try:
