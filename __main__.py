@@ -41,6 +41,7 @@ def main():
     input = initial_args.input_file
     
     map = create_map(input)
+    #refined_map = refine_model(map)
 
     #find essential genes
     genes = find_essential_genes(map)
@@ -53,7 +54,7 @@ def main():
     chokepoints = find_chokepoint_reactions(map)
 
     #find Essential chokepoint genes
-    essential_CP =find_essential_chokepoint_reactions(map) 
+    essential_CP =find_essential_chokepoint_reactions(map, genes) 
     
     genes_df = pd.Series(list(genes))
     chokepoints_df = pd.Series(list(chokepoints))

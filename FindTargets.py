@@ -18,9 +18,9 @@ A protein is considered a potential target if it fits all the criteria above.
 ###############################################################################
 from TARDIS.Initialise import *
 import subprocess
-from Bio.Blast import NCBIWWW
-from Bio.Blast import NCBIXML
+import cobra
 from contrabass.core import CobraMetabolicModel
+from cobra.flux_analysis import single_gene_deletion
 
 # License
 ###############################################################################
@@ -64,12 +64,45 @@ def create_map (input):
             print(clrs['g']+'Input file provided. Creating metabolic map...'+clrs['n'])
         subprocess.run(["carve", input])
         if input.endswith('.faa'):
-            model = CobraMetabolicModel(str(input).replace('.faa', '.xml'))
+            model = input.replace('.faa', '.xml')
         else:
-            model = CobraMetabolicModel(str(input).replace('.fasta', '.xml'))
+            model = input.replace('.fasta', '.xml')
     else:
         print(clrs['r']+'ERROR: '+clrs['n']+'The input file must be in FASTA format (.faa).')
     return model
+
+def refine_model (input):
+    '''Refine the metabolic map
+
+    Parameters
+    ----------
+    Metabolic map in SBML format (.xml)
+
+    Returns
+    -------
+    Refined metabolic map in SBML format (.xml)
+    '''
+
+    #open sbml metabolic model
+    model = cobra.io.read_sbml_model(input)
+
+    #Open the model as a CONSTRABASS object to use the methods below
+    CBmodel = CobraMetabolicModel(model)
+
+    # update flux bounds with FVA
+    CBmodel.fva(update_flux=True)
+
+    #remove Dead-end metabolites
+    CBmodel.remove_dem()
+
+    #save the refined model
+    cobra.write_sbml_model(CBmodel, (input.replace('.xml', '_refined.xml')))
+    refined_model = input.replace('.xml', '_refined.xml')
+
+    return refined_model
+
+
+
 
 def find_essential_genes (model):
     '''Find essential genes in the metabolic map
@@ -86,21 +119,51 @@ def find_essential_genes (model):
     ------
     None
    '''
-    
+
+    #open sbml metabolic model
+    model = cobra.io.read_sbml_model(model)
+
+    #open sbml metabolic model
+    model = cobra.io.read_sbml_model('/home/camila/LMDM/Mestrado/TARDIS/TARDIS/Vibrio_cholerae_serotype_O1.xml')
+
+    #Open the model as a CONSTRABASS object to use the methods below
+    CBmodel = CobraMetabolicModel('cami/home/la/LMDM/Mestrado/TARDIS/TARDIS/Vibrio_cholerae_serotype_O1.xml')
+
     # update flux bounds with FVA
-    model.fva(update_flux=True)
+    CBmodel.fva(update_flux=True)
 
-    # compute essencial genes
-    model.find_essential_genes_1()
+    #remove Dead-end metabolites
+    CBmodel.remove_dem()
 
-    # get essencial genes
-    genes = model.essential_genes()
-    
-    if initial_args.verbosity > 0:
-        print(clrs['g']+'Finding essential genes...'+clrs['n'])
-        model.print_essential_genes()
+    dir(CBmodel)
 
-    return genes
+    #maximize flux through the objective reactions
+    CBmodel.optimize()
+
+    #Performe FVA
+    model.summary(fva=0.9)
+
+    #perform all single gene deletions on a model
+    solution = CBmodel.optimize()
+    solution.objective_value
+
+    #perform all single gene deletions on a model
+    deletion = single_gene_deletion(model)
+    deletion = deletion.reset_index()
+
+    #Growth trashold
+    trashold = 0.25*float(solution.objective_value)
+    trashold
+
+    #finds genes which, when deleted, result in growth less than 5% of the wild-type growth
+    essencial_genes = deletion[deletion['growth'] <= trashold]
+    non_essencial_genes = deletion[deletion['growth'] > trashold]
+    print(non_essencial_genes)
+
+
+    #essencial_genes = deletion[deletion['growth'] <= (0.05*solution)]
+
+    return essencial_genes['ids']
     
 
 def find_chokepoint_reactions (model):
@@ -119,12 +182,15 @@ def find_chokepoint_reactions (model):
     None
    '''
          
+    #Open model
+    cobramodel = CobraMetabolicModel(model)
+
     # update flux bounds with FVA
-    model.fva(update_flux=True)
+    cobramodel.fva(update_flux=True)
 
    # get chokepoints
-    model.find_chokepoints(exclude_dead_reactions=True)
-    chokepoints = model.chokepoints()
+    cobramodel.find_chokepoints(exclude_dead_reactions=True)
+    chokepoints = cobramodel.chokepoints()
 
     chokepoint_list = []
     for i in range(len(chokepoints)):
@@ -133,7 +199,7 @@ def find_chokepoint_reactions (model):
 
     if initial_args.verbosity > 0:
         print(clrs['g']+'Finding chokepoint reactions...'+clrs['n'])
-        model.print_chokepoints()
+        cobramodel.print_chokepoints()
 
      # remove duplicates
     chokepoint_list = list(set(chokepoint_list))
@@ -141,7 +207,7 @@ def find_chokepoint_reactions (model):
     # get chokepoints
     return chokepoint_list
 
-def find_essential_chokepoint_reactions (model):
+def find_essential_chokepoint_reactions (model, essential_genes):
     '''Find essential genes reactions in the metabolic map
 
     Parameters
@@ -157,23 +223,21 @@ def find_essential_chokepoint_reactions (model):
     None
    '''
     
-    # update flux bounds with FVA
-    model.fva(update_flux=True)
-
+    #Open model
+    model = CobraMetabolicModel(model)
     #find chokepoints
     model.find_chokepoints(exclude_dead_reactions=True)
     chokepoints = model.chokepoints()
 
     #find essential genes
-    model.find_essential_genes_1()
-    genes = list(model.essential_genes())
+    genes = list(essential_genes)
    
     # get essential_chokepoint_reactions
     essential_CP = []
     for i in range(len(chokepoints)):
         for j in range(len(genes)):
-            if chokepoints[i][0].gene_reaction_rule == genes[j].id:
-                essential_CP.append(genes[j].id)
+            if chokepoints[i][0].gene_reaction_rule == genes[j]:
+                essential_CP.append(genes[j])
 
     # remove duplicates
     essential_CP = list(set(essential_CP))
