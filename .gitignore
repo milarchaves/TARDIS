@@ -200,7 +200,6 @@ docs/
 *.xml
 *.txt
 *.fasta.gz
-humanProtDB/
 TARDIS/output.xls
 output.csv
 d_radiodurans.xml
