@@ -59,7 +59,11 @@ def main():
     chokepoints_df = pd.Series(list(chokepoints))
     essential_CP_df = pd.Series(list(essential_CP))
 
-    frame = {'Essential genes': genes_df, 'Chokepoint Reactions': chokepoints_df, 'Essential chokepoint genes': essential_CP_df}
+    frame = {
+        'Essential genes': genes_df, 
+        'Chokepoint Reactions': chokepoints_df, 
+        'Essential chokepoint genes': essential_CP_df
+        }
 
     output = pd.DataFrame(frame)
     #save output dataframe

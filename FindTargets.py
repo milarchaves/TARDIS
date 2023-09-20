@@ -42,12 +42,12 @@ This project is licensed under Creative Commons license (CC-BY-4.0)
 # functions
 ###############################################################################
 
-def create_map (input):
+def create_map (input: str) -> CobraMetabolicModel:
     '''Open input file, parse protein name and sequence to output dataframe and create the metabolic map
 
     Parameters
     ----------
-    Imput file in FASTA format (.faa)
+    Input file in FASTA format (.faa)
 
     Returns
     -------
@@ -57,6 +57,7 @@ def create_map (input):
     ------
     No input file or input file in wrong format error
     '''
+
     if input is None:
         print(clrs['r']+'ERROR: '+clrs['n']+'No input file was provided. Please use the'+clrs['y']+' -f '+clrs['n']+'flag to provide the proteome file.')
     if input.endswith('.faa') or input.endswith('.fasta'):
@@ -76,7 +77,8 @@ def find_essential_genes (model):
 
     Parameters
     ----------
-    Metabolic map in SBML format (.xml)
+    model: CobraMetabolicModel
+        Metabolic map in SBML format (.xml)
 
     Returns
     -------
