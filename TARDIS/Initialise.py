@@ -15,6 +15,8 @@ from TARDIS.Initialise import *
 ###############################################################################
 import argparse
 import textwrap as tw
+import subprocess
+import os
 
 # License
 ###############################################################################
@@ -71,32 +73,45 @@ epilogue = tw.dedent("""
 # functions
 ###############################################################################
 
-
-def create_tardis_conf() -> None:
-    '''Creates the 'TARDIS.conf' file.
+def create_map (input, template) -> str:
+    '''Open input file, parse protein name and sequence to output dataframe and create the metabolic map
 
     Parameters
     ----------
-    None
+    Input file in FASTA format (.faa)
 
     Returns
     -------
-    None
+    Metabolic map in SBML format (.xml)
 
     Raises
     ------
-    None
+    No input file or input file in wrong format error
     '''
-    conf_file = "TARDIS.conf"
-    with open(conf_file, 'w') as cf:
-        cf.write(tw.dedent("""
-        # CarveMe Executable
-        carveme_exe = "/home/camila/anaconda3/envs/tardis/bin/carve"
+    if input.endswith('.faa') or input.endswith('.fasta'):
+        if initial_args.verbosity > 0:
+            print(clrs['g']+'Input file provided. Creating metabolic map...'+clrs['n'])
+        if template == 'grampos':
+            subprocess.run(["carve", os.path.join(input), "--fbc2", "--universe", "grampos"])
+        elif template == 'gramneg':
+            subprocess.run(["carve", os.path.join(input), "--fbc2", "--universe", "gramneg"])
+        if input.endswith('.faa'):
+            model = str(input).replace('.faa', '.xml')
+        else:
+            model = str(input).replace('.fasta', '.xml')
+    elif input.endswith('.fna'):
+        if initial_args.verbosity > 0:
+            print(clrs['g']+'Input file provided. Creating metabolic map...'+clrs['n'])
+        if template == 'grampos':
+            subprocess.run(["carve", "--dna", os.path.join(input), "--fbc2", "--universe", "grampos"])
+        elif template == 'gramneg':
+            subprocess.run(["carve", "--dna", os.path.join(input), "--fbc2", "--universe", "gramneg"])
+        model = str(input).replace('.fna', '.xml')
 
-        # FindCP Executable
-        findcp_exe = """))
+    else:
+        print(clrs['r']+'ERROR: '+clrs['n']+'The input file must be in FASTA format')
+    return model
 
-    print(clrs['g']+'Configuration file created!'+clrs['n']+' Please'+clrs['y']+' EDIT ITS CONTENTS '+clrs['n']+'to match your environment and run TARDIS again.')
 
 # Define Global Variables
 ###############################################################################
@@ -121,15 +136,24 @@ def argument_parsing():
                                      epilog=epilogue)
 
 
-    parser.add_argument('-f', '--file',
+    parser.add_argument('-i', '--input',
                         dest='input_file',
                         type=str,
-                        metavar='',
-                        help='File containing the paths of bacterial genome .fna or proteome .faa')
-
-    parser.add_argument('-o', '--output',dest='output',
+                        help='Path of bacterial genome (.fna) or proteome (.faa) file')
+    
+    parser.add_argument('-m', '--metabolic-map',
+                        dest='metabolic_map',
                         type=str,
-                        metavar='',
+                        help='Path of metabolic map in SBML format (.xml)')
+    
+    parser.add_argument('-t', '--template',
+                        dest='template',
+                        type=str,
+                        help='Indicate the template to be used for the gram-positive bacteria in CarveMe reconstruction. grampos for gram-positive bacteria and gramneg for gram-negative bacteria')
+
+    parser.add_argument('-o', '--output',
+                        dest='output',
+                        type=str,
                         help='Defines the output path')
 
     parser.add_argument('-v', '--verbose',
@@ -138,14 +162,9 @@ def argument_parsing():
                         default=0,
                         help='Controls verbosity')
 
-    parser.add_argument('--conf',
-                        dest='config_file',
-                        type=str,
-                        metavar='',
-                        help='Configuration file containing external executable paths')
-
-    parser.add_argument('-vn', '--version', action='version',
-                    version=f'%(prog)s {TARDISVersion}')
+    parser.add_argument('-vn', '--version', 
+                        action='version',
+                        version=f'%(prog)s {TARDISVersion}')
 
     initial_args = parser.parse_args()
 

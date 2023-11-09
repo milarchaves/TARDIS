@@ -17,7 +17,6 @@ A protein is considered a potential target if it fits all the criteria above.
 # Imports
 ###############################################################################
 from TARDIS.Initialise import *
-import subprocess
 from Bio.Blast import NCBIWWW
 from Bio.Blast import NCBIXML
 from contrabass.core import CobraMetabolicModel
@@ -42,37 +41,7 @@ This project is licensed under Creative Commons license (CC-BY-4.0)
 # functions
 ###############################################################################
 
-def create_map (input: str) -> CobraMetabolicModel:
-    '''Open input file, parse protein name and sequence to output dataframe and create the metabolic map
-
-    Parameters
-    ----------
-    Input file in FASTA format (.faa)
-
-    Returns
-    -------
-    Metabolic map in SBML format (.xml)
-
-    Raises
-    ------
-    No input file or input file in wrong format error
-    '''
-
-    if input is None:
-        print(clrs['r']+'ERROR: '+clrs['n']+'No input file was provided. Please use the'+clrs['y']+' -f '+clrs['n']+'flag to provide the proteome file.')
-    if input.endswith('.faa') or input.endswith('.fasta'):
-        if initial_args.verbosity > 0:
-            print(clrs['g']+'Input file provided. Creating metabolic map...'+clrs['n'])
-        subprocess.run(["carve", input])
-        if input.endswith('.faa'):
-            model = CobraMetabolicModel(str(input).replace('.faa', '.xml'))
-        else:
-            model = CobraMetabolicModel(str(input).replace('.fasta', '.xml'))
-    else:
-        print(clrs['r']+'ERROR: '+clrs['n']+'The input file must be in FASTA format (.faa).')
-    return model
-
-def find_essential_genes (model):
+def find_essential_genes (map):
     '''Find essential genes in the metabolic map
 
     Parameters
@@ -89,6 +58,8 @@ def find_essential_genes (model):
     None
    '''
     
+    model = CobraMetabolicModel(map)
+
     # update flux bounds with FVA
     model.fva(update_flux=True)
 
@@ -105,7 +76,7 @@ def find_essential_genes (model):
     return genes
     
 
-def find_chokepoint_reactions (model):
+def find_chokepoint_reactions (map):
     '''Find chokepoint reactions in the metabolic map
 
     Parameters
@@ -120,7 +91,9 @@ def find_chokepoint_reactions (model):
     ------
     None
    '''
-         
+    
+    model = CobraMetabolicModel(map)
+
     # update flux bounds with FVA
     model.fva(update_flux=True)
 
@@ -143,7 +116,7 @@ def find_chokepoint_reactions (model):
     # get chokepoints
     return chokepoint_list
 
-def find_essential_chokepoint_reactions (model):
+def find_essential_chokepoint_reactions (map):
     '''Find essential genes reactions in the metabolic map
 
     Parameters
@@ -158,7 +131,8 @@ def find_essential_chokepoint_reactions (model):
     ------
     None
    '''
-    
+    model = CobraMetabolicModel(map)
+
     # update flux bounds with FVA
     model.fva(update_flux=True)
 

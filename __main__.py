@@ -38,22 +38,28 @@ global output
 ###############################################################################
 def main():
     #create metabolic map
-    input = initial_args.input_file
-    
-    map = create_map(input)
+    if initial_args.input_file and initial_args.template:
+        map = create_map(initial_args.input_file, initial_args.template)
+        model = map
+    elif initial_args.metabolic_map:
+        model = initial_args.metabolic_map
+    else:
+        print('Please, provide a metabolic map in SBML format or a proteome file indicating the template (grampos or gramneg) to be used to build the pyth. For more information, use -h or --help')
+        exit()
 
     #find essential genes
-    genes = find_essential_genes(map)
+    genes = find_essential_genes(model)
+
     #save essential genes in a txt file with the same name as the input file
-    with open(input.replace(".fasta", ".txt"), 'w') as f:
+    with open(model.replace(".xml", ".txt"), 'w') as f:
         for item in genes:
             f.write("%s\n" % item)
     
     #find chokepoints
-    chokepoints = find_chokepoint_reactions(map)
+    chokepoints = find_chokepoint_reactions(model)
 
     #find Essential chokepoint genes
-    essential_CP =find_essential_chokepoint_reactions(map) 
+    essential_CP =find_essential_chokepoint_reactions(model) 
     
     genes_df = pd.Series(list(genes))
     chokepoints_df = pd.Series(list(chokepoints))
@@ -70,26 +76,28 @@ def main():
     output.to_csv('output.csv', sep='\t', index=False)
     
     #Retrieve targets sequences
-    with open(input, 'r'):
-        seqs = list(SeqIO.parse(input, "fasta"))
-    
-    #create a directory to save the targets sequences
-    namedir = input.replace(".fasta", "")
-    if not os.path.isdir(namedir):
-        os.mkdir(namedir)
-    for seq in seqs:
-        if seq.id.replace('|', '_') in essential_CP:
-            try:
-                name = os.path.join('targets', seq.id.split('|')[1] + '.fasta')
-                with open(name, 'a') as f:
-                    f.write('>' + seq.id + '\n' + str(seq.seq))
-                if initial_args.verbosity > 0:
-                    print(clrs['g']+'Targets sequences...'+clrs['n'])
-                    print(seq.id)
-                    print(seq.seq)
-                    print('\n')            
-            except:
-                pass
+    if initial_args.input_file:
+        input = initial_args.input_file
+        with open(input, 'r'):
+            seqs = list(SeqIO.parse(input, "fasta"))
+        
+        #create a directory to save the targets sequences
+        namedir = input.replace(".fasta", "")
+        if not os.path.isdir(namedir):
+            os.mkdir(namedir)
+        for seq in seqs:
+            if seq.id.replace('|', '_') in essential_CP:
+                try:
+                    name = os.path.join('targets', seq.id.split('|')[1] + '.fasta')
+                    with open(name, 'a') as f:
+                        f.write('>' + seq.id + '\n' + str(seq.seq))
+                    if initial_args.verbosity > 0:
+                        print(clrs['g']+'Targets sequences...'+clrs['n'])
+                        print(seq.id)
+                        print(seq.seq)
+                        print('\n')            
+                except:
+                    pass
   
 # Execute
 ###############################################################################
