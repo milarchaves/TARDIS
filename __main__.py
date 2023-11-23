@@ -82,7 +82,7 @@ def main():
             seqs = list(SeqIO.parse(input, "fasta"))
         
         #create a directory to save the targets sequences
-        namedir = input.replace(".fasta", "")
+        namedir = input.replace(".fasta", "").replace(".faa", "")
         if not os.path.isdir(namedir):
             os.mkdir(namedir)
         for seq in seqs:
