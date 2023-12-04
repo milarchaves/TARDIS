@@ -2,8 +2,9 @@
 
 # Imports
 ###############################################################################
-from TARDIS.Initialise import *
+from Initialise import *
 from FindTargets import *
+from TARDIS.HomologySearch import *
 import os
 import pandas as pd
 from Bio import SeqIO
@@ -98,7 +99,9 @@ def main():
                         print('\n')            
                 except:
                     pass
-  
+    
+    #Create database for specificity analysis
+
 # Execute
 ###############################################################################
 if __name__ == "__main__":

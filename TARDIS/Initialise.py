@@ -74,7 +74,7 @@ epilogue = tw.dedent("""
 ###############################################################################
 
 def create_map (input, template) -> str:
-    '''Open input file, parse protein name and sequence to output dataframe and create the metabolic map
+    '''Open input file, parse protein name and sequence to output dataframe and create the metabolic map using CarveMe (D. Machado et al, 2018. https://doi.org/10.1093/nar/gky537)
 
     Parameters
     ----------
@@ -82,7 +82,7 @@ def create_map (input, template) -> str:
 
     Returns
     -------
-    Metabolic map in SBML format (.xml)
+    Path to metabolic map in SBML format (.xml)
 
     Raises
     ------

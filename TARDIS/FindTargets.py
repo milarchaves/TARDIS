@@ -5,10 +5,9 @@
 '''
 This file contain the metabolic moddeling routine to find new targets.
 
-1. Create the metabolic map using CarveMe (D. Machado et al, 2018. https://doi.org/10.1093/nar/gky537)
-2. Find essential genes
-3. Find chokepoint reactions (Oarga et al, 2020. https://doi.org/10.1007/978-3-030-60327-4_6)
-4. Check if exists homology in human genome
+1. Find essential genes
+2. Find chokepoint reactions (Oarga et al, 2020. https://doi.org/10.1007/978-3-030-60327-4_6)
+3. Check if exists homology in human genome
 
 A protein is considered a potential target if it fits all the criteria above.  
 
@@ -17,8 +16,6 @@ A protein is considered a potential target if it fits all the criteria above.
 # Imports
 ###############################################################################
 from TARDIS.Initialise import *
-from Bio.Blast import NCBIWWW
-from Bio.Blast import NCBIXML
 from contrabass.core import CobraMetabolicModel
 
 # License
@@ -159,26 +156,5 @@ def find_essential_chokepoint_reactions (map):
         print(essential_CP)
    
     return essential_CP
-
-def homology_search (model, output):
-    '''Find homology in human genome
-
-    Parameters
-    ----------
-    Metabolic map in SBML format (.xml)
-    Output dataframe
-
-    Returns
-    -------
-    Output dataframe with homology information
-
-    Raises
-    ------
-    None
-   '''
-    if initial_args.verbosity > 0:
-        print(clrs['g']+'Finding homology in human genome...'+clrs['n'])
-    #find homology in human genome
-  
 
     
