@@ -98,7 +98,27 @@ def main():
                         print('\n')            
                 except:
                     pass
-  
+    
+    #Create database for specificity analysis
+    if initial_args.database.endswith('.faa') or initial_args.database.endswith('.fasta'):
+        if initial_args.verbosity > 0:
+            print(clrs['g']+'Creating database for specificity analysis...'+clrs['n'])    
+        if initial_args.database_name:
+            database_name = initial_args.database_name
+        else:
+            database_name = initial_args.database.replace(".fasta", "").replace(".faa", "")
+        make_database(initial_args.database, database_name)
+    else:
+         print(clrs['g']+'Please provide a file in fasta format...'+clrs['n'])
+    
+    #Run Psi-Blast to search for similarity in the database
+    if initial_args.evalue:
+        if initial_args.verbosity > 0:
+            print(clrs['g']+'Iniciating specificity analysis...'+clrs['n']) 
+        blast_check(database_name,  namedir, initial_args.evalue)
+
+
+
 # Execute
 ###############################################################################
 if __name__ == "__main__":

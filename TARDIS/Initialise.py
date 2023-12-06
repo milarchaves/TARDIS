@@ -155,6 +155,22 @@ def argument_parsing():
                         dest='output',
                         type=str,
                         help='Defines the output path')
+    
+    parser.add_argument('-d', '--database',
+                        dest='database',
+                        type=str,
+                        help='Creates database for specificity analysis from a proteome file in fasta format')
+    
+    parser.add_argument('-dn', '--database-name',
+                        dest='database_name',
+                        type=str,
+                        help='Names the database for specificity analysis')
+    
+    parser.add_argument('-e', '--evalue',
+                    dest='evalue',
+                    type=float,
+                    default=0.04,
+                    help='Defines the e-value threshold for psi-blast (default: 0.04)')
 
     parser.add_argument('-v', '--verbose',
                         dest='verbosity',
