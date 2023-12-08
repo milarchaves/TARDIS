@@ -13,7 +13,7 @@ This file implements the protocol to look for specificity in the targets found.
 
 # Imports
 ###############################################################################
-from TARDIS.Initialise import *
+from Initialise import *
 import os
 import subprocess
 from Bio.Blast import NCBIXML
@@ -30,7 +30,6 @@ def make_database(fasta_file, database_name):
                    '-parse_seqids']
     subprocess.run(make_db_cmd, shell=True)
 
-
 def blast_check(database, targets, evalue):
 
     # set the output file name
@@ -44,9 +43,11 @@ def blast_check(database, targets, evalue):
             blast_cmd = ['psiblast',
                  '-query', query_file,
                  '-db', database,
-                 '-num_iterations', 3,
+                 '-num_iterations', "3",
+                 '-out', output_file,
                  '-outfmt', '5']
-            subprocess.run(blast_cmd, shell=True)
+            subprocess.run(blast_cmd)
+            #print(" ".join(blast_cmd))
 
     # Iterate through the BLAST records
     for record in NCBIXML.parse(open(output_file)):
@@ -55,8 +56,9 @@ def blast_check(database, targets, evalue):
             # Iterate through the HSPs
             for hsp in alignment.hsps:
                 # Check if the HSP meets the e-value threshold
-                if hsp.expect < evalue:
-                    print("\n")
-                    print("query: %s" % record.query[:100])
-                    print("Match: {}, E-value: {}".format(alignment.title, hsp.expect))
-
+                if hsp.expect > evalue:
+                    with open("specificity_results.txt", "a") as f:
+                        f.write("query: %s" % record.query[:100])
+                        f.write("Match: {}, E-value: {}".format(alignment.title, hsp.expect))
+                        f.write("\n")
+                        f.write("Coverage: {} %".format((hsp.query_end - hsp.query_start)/len(record.query)*100))

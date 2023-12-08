@@ -6,9 +6,9 @@
 
 ## Tasks ##
 
-1. Parse blast results
+1. ~Create the optional flag HomologySearch in argparse~
 2. ~Call blast HomologySearch module in main~ 
-3. ~Create the optional flag HomologySearch in argparse~
+3. ~Parse blast results~
 4. Fix the error - ModuleNotFoundError: No module named 'FindTargets' -
 5. Up TARDIS to PyPi
 6. Run DEG proteomes again for Essential genes validation
