@@ -17,8 +17,10 @@ import TARDIS.HomologySearch as HomologySearch
 # Imports
 ###############################################################################
 from TARDIS.Initialise import *
+
 import os
 import subprocess
+
 from Bio.Blast import NCBIXML
 
 # Functions
@@ -41,6 +43,7 @@ def make_database(fasta_file: str, database_name: str) -> None:
                    "-out", database_name,
                    "-title", database_name,
                    "-parse_seqids"]
+    
     subprocess.run(make_db_cmd, shell=True)
 
     return None

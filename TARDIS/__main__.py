@@ -26,10 +26,6 @@ This project is licensed under Creative Commons license (CC-BY-4.0)
 # Description
 ###############################################################################
 
-# Global variables
-###############################################################################
-global output
-
 # Functions
 ###############################################################################
    
@@ -39,36 +35,43 @@ def main() -> None:
     '''Main function of the pipeline
     '''
 
-    # Create the target directory    
-    target_dir, target_subdir = Toolbox.create_dirs()
+    try:
+        # Create the target directory    
+        target_dir, target_subdir = Toolbox.create_dirs()
 
-    # Get the metabolic map
-    model = Toolbox.get_model(target_dir)
+        # Get the metabolic map
+        model_path = Toolbox.get_model(target_dir)
 
-    # Find essential genes
-    genes = FindTargets.find_essential_genes(model)
+        # Create the metabolic model and update flux bounds with FVA (computing this only once makes the pipeline more efficient)
+        model = FindTargets.initialize_model(model_path)
 
-    # Save essential genes in a txt file with the same name as the input file
-    _ = Toolbox.save_essential_genes(model, genes)
-    
-    # Find chokepoints
-    chokepoints = FindTargets.find_chokepoint_reactions(model)
+        # Find essential genes
+        genes = FindTargets.find_essential_genes(model)
 
-    # Find Essential chokepoint genes
-    essential_CP = FindTargets.find_essential_chokepoint_reactions(model)
+        # Save essential genes in a txt file with the same name as the input file
+        _ = Toolbox.save_essential_genes(model_path, genes)
+        
+        # Find chokepoints
+        chokepoints = FindTargets.find_chokepoint_reactions(model)
 
-    # Create output dataframe
-    _ = Toolbox.create_output_file(target_dir, genes, chokepoints, essential_CP)
+        # Find Essential chokepoint genes
+        essential_CP = FindTargets.find_essential_chokepoint_reactions(model)
 
-    # If there are any essential chokepoint genes, retrieve their sequences
-    if essential_CP:
-        # Retrieve targets sequences
-        _ = Toolbox.retrieve_targets(target_subdir, essential_CP)
-    else:
-        # Warn the user that no essential chokepoint genes were found
-        print(f"{clrs['c']}INFO{clrs['n']}: No essential chokepoint genes found!")
+        # Create output dataframe
+        _ = Toolbox.create_output_file(target_dir, genes, chokepoints, essential_CP)
 
-    # Create database for specificity analysis
+        # If there are any essential chokepoint genes, retrieve their sequences
+        if essential_CP:
+            # Retrieve targets sequences
+            _ = Toolbox.retrieve_targets(target_subdir, essential_CP)
+        else:
+            # Warn the user that no essential chokepoint genes were found
+            print(f"{clrs['c']}INFO{clrs['n']}: No essential chokepoint genes found!")
+
+        # Create database for specificity analysis
+    except Exception as e:
+        print(f"{clrs['r']}ERROR{clrs['n']}: {e}")
+        exit(1)
 
 # Execute
 ###############################################################################

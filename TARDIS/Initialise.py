@@ -15,7 +15,7 @@ from TARDIS.Initialise import *
 ###############################################################################
 import argparse
 import textwrap as tw
-import os
+import sys
 
 from reframed import set_default_solver
 
@@ -94,6 +94,35 @@ def argument_parsing() -> argparse.Namespace:
 
     return initial_args
 
+def set_solver() -> None:
+    '''Set the default solver.'''
+
+    try:
+        # Set the solver as lowercase
+        initial_args.solver = initial_args.solver.lower()
+
+        # Try to set the default solver
+        set_default_solver(initial_args.solver)
+    except Exception as e1:
+        # Check if the chosen solver is not scip
+        if initial_args.solver != "scip":
+            # Warn the user that the solver will be changed to SCIP (and it will take longer to run)
+            print(f"{clrs['y']}WARNING{clrs['n']}: The solver {initial_args.solver} is not available. Using SCIP instead. The analysis may take longer to complete.")
+            
+            try:
+                # Set the default solver to SCIP
+                initial_args.solver = "scip"
+
+                # Try to set the default solver to SCIP
+                set_default_solver(initial_args.solver)
+            except Exception as e2:
+                # If it fails, print an error message and exit
+                print(f"{clrs['r']}ERROR{clrs['n']}: {e2}")
+                sys.exit(1)
+        else:
+            print(f"{clrs['r']}ERROR{clrs['n']}: {e1}")
+            sys.exit(1)
+
 # Splash, version & clear tmp
 ###############################################################################
 TARDISVersion = "1.0"
@@ -151,25 +180,4 @@ initial_args = argument_parsing()
 print(description)
 
 # Solver checking
-try:
-    # Try to set the default solver
-    set_default_solver(initial_args.solver)
-except Exception as e1:
-    # Check if the chosen solver is not scip
-    if initial_args.solver != "scip":
-        # Warn the user that the solver will be changed to SCIP (and it will take longer to run)
-        print(f"{clrs['y']}WARNING{clrs['n']}: The solver {initial_args.solver} is not available. Using SCIP instead. The analysis may take longer to complete.")
-        
-        try:
-            # Set the default solver to SCIP
-            initial_args.solver = "scip"
-
-            # Try to set the default solver to SCIP
-            set_default_solver(initial_args.solver)
-        except Exception as e2:
-            # If it fails, print an error message and exit
-            print(f"{clrs['r']}ERROR{clrs['n']}: {e2}")
-            exit(1)
-    else:
-        print(f"{clrs['r']}ERROR{clrs['n']}: {e1}")
-        exit(1)
+set_solver()

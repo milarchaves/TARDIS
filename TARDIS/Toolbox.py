@@ -50,8 +50,7 @@ def create_dir(dirname: str) -> None:
 
     try:
         # If the directory does not exist, create it
-        if not os.path.exists(dirname):
-            os.mkdir(dirname)
+        os.makedirs(dirname, exist_ok = True)
         
         if initial_args.verbosity > 0:
             print(f"{clrs['g']}Directory created{clrs['n']}: {dirname}")
@@ -59,11 +58,7 @@ def create_dir(dirname: str) -> None:
     except OSError as e:
         print(f"Creation of the directory {dirname} failed. Error: {e}")
         exit(3)
-    # Catch any other exception
-    except Exception as e:
-        print(f"Unknown error occurred: {e}")
-        exit(4)
-    
+
     return None
 
 def create_dirs() -> tuple[str, str]:
@@ -79,21 +74,19 @@ def create_dirs() -> tuple[str, str]:
         The target directory and its subdirectory
     '''
 
-    # Create the output directory
-    create_dir(initial_args.output)
-
     # Get the target directory name
     target_dir = os.path.join(
         initial_args.output,
         os.path.splitext(os.path.basename(initial_args.input_file))[0]
     )
 
-    # Create the target directory
-    create_dir(target_dir)
-
     # Parameterize the target directory
     target_subdir = os.path.join(target_dir, "targets")
 
+    # Create the output directory
+    create_dir(initial_args.output)
+    # Create the target directory
+    create_dir(target_dir)
     # Create the target subdirectory
     create_dir(target_subdir)
     
@@ -114,14 +107,10 @@ def create_output_file(target_dir: str, genes: set[Gene], chokepoints: list[str]
         Essential chokepoint genes list
     '''
 
-    genes_df = pd.Series(list(genes))
-    chokepoints_df = pd.Series(list(chokepoints))
-    essential_CP_df = pd.Series(list(essential_CP))
-
     frame = {
-        "Essential genes": genes_df, 
-        "Chokepoint Reactions": chokepoints_df, 
-        "Essential chokepoint genes": essential_CP_df
+        "Essential genes": pd.Series(list(genes)), 
+        "Chokepoint Reactions": pd.Series(list(chokepoints)), 
+        "Essential chokepoint genes": pd.Series(list(essential_CP))
     }
 
     output = pd.DataFrame(frame)
@@ -171,43 +160,31 @@ def retrieve_targets(target_subdir: str, essential_CP: set[Gene]) -> None:
         Essential chokepoint genes list
     '''
 
-    # If the input file has been provided
-    if initial_args.input_file:
-        try:
-            # Open the input file
-            with open(initial_args.input_file, 'r'):
-                # Parse the sequences
-                seqs = list(SeqIO.parse(initial_args.input_file, "fasta"))
-        except FileNotFoundError as e:
-            print(f"{clrs['r']}ERROR{clrs['n']}: The input file was not found.")
-            print(f"Error message: {e}")
-            exit(6)
-        except Exception as e:
-            print(f"{clrs['r']}ERROR{clrs['n']}: An unknown error occurred.")
-            print(f"Error message: {e}")
-            exit(7)
+    # Check if the input file is provided
+    if not initial_args.input_file:
+        return
+    
+    try:
+        # Parse the sequences
+        seqs = list(SeqIO.parse(initial_args.input_file, "fasta"))
+    except FileNotFoundError as e:
+        print(f"{clrs['r']}ERROR{clrs['n']}: The input file was not found.")
+        print(f"Error message: {e}")
+        exit(6)
+    except Exception as e:
+        print(f"{clrs['r']}ERROR{clrs['n']}: An unknown error occurred.")
+        print(f"Error message: {e}")
+        exit(7)
 
-        # For each sequence in the input file
-        for seq in seqs:
-            # If the sequence is in the essential chokepoint genes list
-            if seq.id.replace('|', '_') in essential_CP: # TODO: make this more robust
-                try:
-                    if '|' in seq.id:
-                        name = os.path.join(target_subdir, seq.id.split('|')[1] + ".fasta")
-                    else:
-                        name = os.path.join(target_subdir, seq.id + ".fasta")
-                    
-                    with open(name, 'a') as f:
-                        f.write(f">{seq.id}\n{str(seq.seq)}")
+    # For each sequence in the input file
+    for seq in seqs:
+        # Parameterize the gene id
+        gene_id = seq.id.replace('|', '_')
 
-                    if initial_args.verbosity > 0:
-                        print(f"{clrs['g']}Targets sequences...{clrs['n']}")
-                        print(seq.id)
-                        print(seq.seq)
-                        print('\n')            
-                except:
-                    pass
-
+        # If the sequence is in the essential chokepoint genes list
+        if gene_id in essential_CP: # TODO: make this more robust
+            write_sequence_to_file(target_subdir, seq)
+    
     return None
 
 def save_essential_genes(model: str, genes: set[Gene]) -> None:
@@ -227,3 +204,33 @@ def save_essential_genes(model: str, genes: set[Gene]) -> None:
             f.write(f"{item}\n")
     
     return None
+
+def write_sequence_to_file(target_subdir: str, seq) -> None:
+    '''Write a sequence to a FASTA file.
+
+    Parameters
+    ----------
+    target_subdir : str
+        Path to the target subdirectory
+
+    seq : SeqRecord
+        Sequence record
+    '''
+
+    try:
+        # Get the file name
+        file_name = f"{seq.id.split('|')[1]}.fasta" if '|' in seq.id else f"{seq.id}.fasta"
+
+        # Get the file path
+        file_path = os.path.join(target_subdir, file_name)
+
+        with open(file_path, 'a') as f:
+            f.write(f">{seq.id}\n{str(seq.seq)}")
+
+        if initial_args.verbosity > 0:
+            print(f"{clrs['g']}Targets sequences...{clrs['n']}")
+            print(seq.id)
+            print(seq.seq)
+            print('\n')            
+    except:
+        print(f"{clrs['r']}ERROR{clrs['n']}: An error occurred while writing the sequence '{seq.id}' to the file.")

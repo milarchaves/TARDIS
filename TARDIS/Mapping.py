@@ -36,7 +36,7 @@ This project is licensed under Creative Commons license (CC-BY-4.0)
 ###############################################################################
 
 def create_map(input_path: str, output: str, template: str) -> str:
-    '''Open input file, parse protein name and sequence to output dataframe and create the metabolic map using CarveMe (D. Machado et al, 2018. https://doi.org/10.1093/nar/gky537)
+    '''Open input file, parse protein name and sequence to output dataframe and create the metabolic map using CarveMe (D. Machado et al, 2018. https://doi.org/10.1093/nar/gky537).
 
     Parameters
     ----------
@@ -54,8 +54,14 @@ def create_map(input_path: str, output: str, template: str) -> str:
 
     Raises
     ------
-    No input file or input file in wrong format error
+    ValueError
+        No input file or input file in wrong format error
+    subprocess.CalledProcessError
+        Command failed with exit code error
     '''
+
+    if template not in ["grampos", "gramneg"]:
+        raise ValueError(f"Invalid template: {template}. Use 'grampos' or 'gramneg'.")
 
     # Get the filename from the input
     model = os.path.join(
@@ -63,20 +69,19 @@ def create_map(input_path: str, output: str, template: str) -> str:
         f"{os.path.splitext(os.path.basename(input_path))[0]}.xml"
     )
 
-    if template in ["grampos", "gramneg"]:
-        command = [
-            "carve", 
-            os.path.join(input_path), 
-            "--fbc2", 
-            "--universe", 
-            template, 
-            "-o", 
-            model
-        ]
-    else:
-        print(f"Unrecognized template. Expected either 'grampos' or 'gramneg' but got '{template}'.")
-        exit(2)
-    
+    # Create the command to run CarveMe
+    command = [
+        "carve", 
+        input_path, 
+        "--fbc2", 
+        "--universe", 
+        template, 
+        "-o", 
+        model,
+        "--solver",
+        initial_args.solver
+    ]
+        
     # Check if the input file is in FASTA format for DNA sequences
     if input_path.endswith(".fna"):
         # Add the DNA flag to the command
@@ -97,9 +102,9 @@ def create_map(input_path: str, output: str, template: str) -> str:
     except subprocess.CalledProcessError as e:
         print(f"{clrs['r']}ERROR{clrs['n']}: Command failed with exit code {e.returncode}.")
         print(f"Error message: {e.stderr}")
-        exit(e.returncode)
+        sys.exit(e.returncode)
     except Exception as e:
         print(f"{clrs['r']}ERROR{clrs['n']}: Unexpected error: {str(e)}")
-        exit(1)
+        sys.exit(1)
 
     return model
