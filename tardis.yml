@@ -469,7 +469,7 @@ dependencies:
       - click-configfile==0.2.3
       - click-default-group==1.2.4
       - click-log==0.4.0
-      - cobra==0.26.3
+      - cobra==0.16.0
       - commonmark==0.9.1
       - configparser==6.0.0
       - contrabass==0.2.1

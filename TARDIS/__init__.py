@@ -2,7 +2,7 @@
 
 TARDIS: TARgets DIScoverer
 
-Authors: Chaves, C; Torres, P.H.M.
+Authors: Chaves, C; Rossi, A.D; Torres, P.H.M.
 
 [Federal University of Rio de Janeiro]
 

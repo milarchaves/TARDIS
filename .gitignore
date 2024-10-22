@@ -209,3 +209,10 @@ targets/
 /TARDIS/homology-search.py
 /essential_genes_validation/
 /gutMicrobiomeDB
+
+/cplex
+/cplex/*
+/data
+/data/*
+/test
+/test/*

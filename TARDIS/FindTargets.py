@@ -1,4 +1,4 @@
-#!/usr/lib/python3
+#!/usr/bin/env python3
 
 # Description
 ###############################################################################
@@ -17,6 +17,7 @@ A protein is considered a potential target if it fits all the criteria above.
 ###############################################################################
 from TARDIS.Initialise import *
 from contrabass.core import CobraMetabolicModel
+from cobra import Gene
 
 # License
 ###############################################################################
@@ -24,7 +25,7 @@ from contrabass.core import CobraMetabolicModel
 
 TARDIS: TARgets DIScoverer
 
-Authors: Chaves, C; Torres, P.H.M.
+Authors: Chaves, C; Rossi, A.D; Torres, P.H.M.
 
 [Federal University of Rio de Janeiro]
 
@@ -38,27 +39,24 @@ This project is licensed under Creative Commons license (CC-BY-4.0)
 # functions
 ###############################################################################
 
-def find_essential_genes (map):
+def find_essential_genes(map: str) -> set[Gene]:
     '''Find essential genes in the metabolic map
 
     Parameters
     ----------
-    model: CobraMetabolicModel
-        Metabolic map in SBML format (.xml)
+    map (str)
+        Path to the metabolic map in SBML format (.xml)
 
     Returns
     -------
-    Essencial genes list
-
-    Raises
-    ------
-    None
-   '''
+    set[cobra.Gene]
+        Essencial genes list
+    '''
     
     model = CobraMetabolicModel(map)
 
     # update flux bounds with FVA
-    model.fva(update_flux=True)
+    model.fva(update_flux = True)
 
     # compute essencial genes
     model.find_essential_genes_1()
@@ -67,13 +65,12 @@ def find_essential_genes (map):
     genes = model.essential_genes()
     
     if initial_args.verbosity > 0:
-        print(clrs['g']+'Finding essential genes...'+clrs['n'])
+        print(f"{clrs['g']}Finding essential genes...{clrs['n']}")
         model.print_essential_genes()
 
     return genes
     
-
-def find_chokepoint_reactions (map):
+def find_chokepoint_reactions(map: str) -> list[str]:
     '''Find chokepoint reactions in the metabolic map
 
     Parameters
@@ -83,19 +80,15 @@ def find_chokepoint_reactions (map):
     Returns
     -------
     Chokepoint reactions list
-
-    Raises
-    ------
-    None
-   '''
+    '''
     
     model = CobraMetabolicModel(map)
 
-    # update flux bounds with FVA
-    model.fva(update_flux=True)
+    # Update flux bounds with FVA
+    model.fva(update_flux = True)
 
-   # get chokepoints
-    model.find_chokepoints(exclude_dead_reactions=True)
+    # Get chokepoints
+    model.find_chokepoints(exclude_dead_reactions = True)
     chokepoints = model.chokepoints()
 
     chokepoint_list = []
@@ -104,57 +97,54 @@ def find_chokepoint_reactions (map):
             chokepoint_list.append(chokepoints[i][0].id)
 
     if initial_args.verbosity > 0:
-        print(clrs['g']+'Finding chokepoint reactions...'+clrs['n'])
+        print(f"{clrs['g']}Finding chokepoint reactions...{clrs['n']}")
         model.print_chokepoints()
 
-     # remove duplicates
+    # Remove duplicates
     chokepoint_list = list(set(chokepoint_list))
 
-    # get chokepoints
+    # Get chokepoints
     return chokepoint_list
 
-def find_essential_chokepoint_reactions (map):
+def find_essential_chokepoint_reactions(map: str) -> set[Gene]:
     '''Find essential genes reactions in the metabolic map
 
     Parameters
     ----------
-    Metabolic map in SBML format (.xml)
+    map (str)
+        Metabolic map in SBML format (.xml)
 
     Returns
     -------
-    essential genes reactions list
-
-    Raises
-    ------
-    None
-   '''
+    set[cobra.Gene]
+        Essencial genes reactions list
+    '''
+    
     model = CobraMetabolicModel(map)
 
-    # update flux bounds with FVA
-    model.fva(update_flux=True)
+    # Update flux bounds with FVA
+    model.fva(update_flux = True)
 
-    #find chokepoints
-    model.find_chokepoints(exclude_dead_reactions=True)
+    # Find chokepoints
+    model.find_chokepoints(exclude_dead_reactions = True)
     chokepoints = model.chokepoints()
 
-    #find essential genes
+    # Find essential genes
     model.find_essential_genes_1()
     genes = list(model.essential_genes())
    
-    # get essential_chokepoint_reactions
+    # Get essential_chokepoint_reactions
     essential_CP = []
     for i in range(len(chokepoints)):
         for j in range(len(genes)):
             if chokepoints[i][0].gene_reaction_rule == genes[j].id:
                 essential_CP.append(genes[j].id)
 
-    # remove duplicates
+    # Remove duplicates
     essential_CP = list(set(essential_CP))
 
     if initial_args.verbosity > 0:
-        print(clrs['g']+'Essential chokepoint genes...'+clrs['n'])
+        print(f"{clrs['g']}Essential chokepoint genes...{clrs['n']}")
         print(essential_CP)
    
     return essential_CP
-
-    
