@@ -15,13 +15,13 @@ from TARDIS.Initialise import *
 ###############################################################################
 import argparse
 import textwrap as tw
-import subprocess
 import os
+
+from reframed import set_default_solver
 
 # License
 ###############################################################################
 '''
-
 TARDIS: TARgets DIScoverer
 
 Authors: Chaves, C; Rossi, A.D; Torres, P.H.M.
@@ -32,8 +32,67 @@ Contact info:
 E-mail address: chaves.camila13@gmail.com
 Github: https://github.com/milarchaves
 This project is licensed under Creative Commons license (CC-BY-4.0)
-
 '''
+
+# Functions
+###############################################################################
+def argument_parsing() -> argparse.Namespace:
+    '''Parse command line arguments
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    argparse.Namespace
+        Parsed arguments
+    '''
+
+    parser = argparse.ArgumentParser(prog = "TARDIS",
+                                     formatter_class = argparse.RawDescriptionHelpFormatter,
+                                     description = description,
+                                     epilog = epilogue)
+
+    parser.add_argument("-i", "--input",
+                        dest = "input_file",
+                        type = str,
+                        help = "Path of bacterial genome (.fna) or proteome (.faa) file.")
+
+    parser.add_argument("-m", "--metabolic-map",
+                        dest = "metabolic_map",
+                        type = str,
+                        help = "Path of metabolic map in SBML format (.xml).")
+
+    parser.add_argument("-t", "--template",
+                        dest = "template",
+                        type = str,
+                        help = "Indicate the template to be used for the gram-positive bacteria in CarveMe reconstruction. grampos for gram-positive bacteria and gramneg for gram-negative bacteria.")
+
+    parser.add_argument("-s", "--solver",
+                        dest = "solver",
+                        type = str,
+                        default = "cplex",
+                        help = "Select MILP solver. Available options: cplex [default], gurobi, scip.")
+
+    parser.add_argument("-o", "--output",
+                        dest = "output",
+                        type = str,
+                        help = "Defines the output path.")
+
+    parser.add_argument("-v", "--verbose",
+                        dest = "verbosity",
+                        action = "count",
+                        default = 0,
+                        help = "Controls verbosity.")
+
+    parser.add_argument("-vn", "--version", 
+                        action = "version",
+                        version = f"%(prog)s {TARDISVersion}")
+
+    initial_args = parser.parse_args()
+
+    return initial_args
 
 # Splash, version & clear tmp
 ###############################################################################
@@ -82,66 +141,35 @@ clrs = {
     "b": "\033[1;94m",  # blue
     "p": "\033[1;95m",  # purple
     "c": "\033[1;96m",  # cyan
-    "n": "\033[1;0m"   # default
-    }
+    "n": "\033[1;0m"    # default
+}
 
-# Parse command line arguments
-###############################################################################
-
-def argument_parsing() -> argparse.Namespace:
-    '''Parse command line arguments
-
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    argparse.Namespace
-        Parsed arguments
-    '''
-
-    parser = argparse.ArgumentParser(prog="TARDIS",
-                                     formatter_class=argparse.RawDescriptionHelpFormatter,
-                                     description=description,
-                                     epilog=epilogue)
-
-    parser.add_argument("-i", "--input",
-                        dest="input_file",
-                        type=str,
-                        help="Path of bacterial genome (.fna) or proteome (.faa) file")
-    
-    parser.add_argument("-m", "--metabolic-map",
-                        dest="metabolic_map",
-                        type=str,
-                        help="Path of metabolic map in SBML format (.xml)")
-    
-    parser.add_argument("-t", "--template",
-                        dest="template",
-                        type=str,
-                        help="Indicate the template to be used for the gram-positive bacteria in CarveMe reconstruction. grampos for gram-positive bacteria and gramneg for gram-negative bacteria")
-
-    parser.add_argument("-o", "--output",
-                        dest="output",
-                        type=str,
-                        help="Defines the output path")
-
-    parser.add_argument("-v", "--verbose",
-                        dest="verbosity",
-                        action="count",
-                        default=0,
-                        help="Controls verbosity")
-
-    parser.add_argument("-vn", "--version", 
-                        action="version",
-                        version=f"%(prog)s {TARDISVersion}")
-
-    initial_args = parser.parse_args()
-
-    return initial_args
-
+# Parse the arguments
 initial_args = argument_parsing()
 
+# Print splash
 print(description)
 
-# Criar classe proteína com nome, gene e sequência 
+# Solver checking
+try:
+    # Try to set the default solver
+    set_default_solver(initial_args.solver)
+except Exception as e1:
+    # Check if the chosen solver is not scip
+    if initial_args.solver != "scip":
+        # Warn the user that the solver will be changed to SCIP (and it will take longer to run)
+        print(f"{clrs['y']}WARNING{clrs['n']}: The solver {initial_args.solver} is not available. Using SCIP instead. The analysis may take longer to complete.")
+        
+        try:
+            # Set the default solver to SCIP
+            initial_args.solver = "scip"
+
+            # Try to set the default solver to SCIP
+            set_default_solver(initial_args.solver)
+        except Exception as e2:
+            # If it fails, print an error message and exit
+            print(f"{clrs['r']}ERROR{clrs['n']}: {e2}")
+            exit(1)
+    else:
+        print(f"{clrs['r']}ERROR{clrs['n']}: {e1}")
+        exit(1)

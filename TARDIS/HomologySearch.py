@@ -3,12 +3,15 @@
 # Description
 ###############################################################################
 '''
-This file implements the protocol to look for specificity in the targets found. 
+Protocol implementation to look for specificity in the targets found. 
 
 1. Given a FASTA file with protein sequences, creates a local database
 2. Performs a Psi-BLAST search against the database
 3. Returns targets with similarity below a given e-value threshold (default: 0.04)
-  
+
+They are imported as:
+
+import TARDIS.HomologySearch as HomologySearch
 '''
 
 # Imports
@@ -41,7 +44,6 @@ def make_database(fasta_file: str, database_name: str) -> None:
     subprocess.run(make_db_cmd, shell=True)
 
     return None
-
 
 def blast_check(database: str, targets: str, evalue: float) -> None:
     '''Perform a Psi-BLAST search against a local database and return targets with similarity below a given e-value threshold.

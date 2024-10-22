@@ -7,7 +7,7 @@ Module for performing the mapping analysis using CarveMe.
 
 They are imported as:
 
-from TARDIS.Initialise import *
+import TARDIS.Mapping as Mapping
 '''
 
 # Imports
@@ -20,7 +20,6 @@ import os
 # License
 ###############################################################################
 '''
-
 TARDIS: TARgets DIScoverer
 
 Authors: Chaves, C; Rossi, A.D; Torres, P.H.M.
@@ -31,7 +30,6 @@ Contact info:
 E-mail address: chaves.camila13@gmail.com
 Github: https://github.com/milarchaves
 This project is licensed under Creative Commons license (CC-BY-4.0)
-
 '''
 
 # Functions
@@ -87,7 +85,7 @@ def create_map(input_path: str, output: str, template: str) -> str:
     # Check for verbosity
     if initial_args.verbosity > 0:
         print(f"{clrs['g']}Input file provided. Creating metabolic map...{clrs['n']}")
-        print(f"Command: {' '.join(command)}")
+        print(f"{clrs['c']}Command{clrs['n']}: {' '.join(command)}")
 
     try:
         subprocess.run(
@@ -97,13 +95,11 @@ def create_map(input_path: str, output: str, template: str) -> str:
             capture_output = True
         )
     except subprocess.CalledProcessError as e:
-        print(f"Command failed with exit code {e.returncode}.")
+        print(f"{clrs['r']}ERROR{clrs['n']}: Command failed with exit code {e.returncode}.")
         print(f"Error message: {e.stderr}")
-        print(f"Command: {' '.join(command)}")
         exit(e.returncode)
     except Exception as e:
-        print(f"Unexpected error: {str(e)}")
-        print(f"Command: {' '.join(command)}")
+        print(f"{clrs['r']}ERROR{clrs['n']}: Unexpected error: {str(e)}")
         exit(1)
 
     return model

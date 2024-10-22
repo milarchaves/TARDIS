@@ -3,26 +3,29 @@
 # Description
 ###############################################################################
 '''
-This file contain the metabolic moddeling routine to find new targets.
+Routines to find new targets in the metabolic map.
 
 1. Find essential genes
 2. Find chokepoint reactions (Oarga et al, 2020. https://doi.org/10.1007/978-3-030-60327-4_6)
 3. Check if exists homology in human genome
 
-A protein is considered a potential target if it fits all the criteria above.  
+A protein is considered a potential target if it fits all the criteria above.
 
+They are imported as:
+
+import TARDIS.FindTargets as FindTargets
 '''
 
 # Imports
 ###############################################################################
 from TARDIS.Initialise import *
+
 from contrabass.core import CobraMetabolicModel
 from cobra import Gene
 
 # License
 ###############################################################################
 '''
-
 TARDIS: TARgets DIScoverer
 
 Authors: Chaves, C; Rossi, A.D; Torres, P.H.M.
@@ -33,7 +36,6 @@ Contact info:
 E-mail address: chaves.camila13@gmail.com
 Github: https://github.com/milarchaves
 This project is licensed under Creative Commons license (CC-BY-4.0)
-
 '''
 
 # functions
