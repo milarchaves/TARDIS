@@ -158,13 +158,13 @@ def find_essential_chokepoint_reactions(model: Union[str, CobraMetabolicModel]) 
     compute_if_needed(model, ["essential_genes", "chokepoints"])
 
     # Get chokepoints using set comprehension to remove duplicates
-    chokepoints = list({cp[0].gene_reaction_rule for cp in model.chokepoints()})
+    chokepoints = {cp[0].gene_reaction_rule for cp in model.chokepoints()}
 
     # Get essential genes using set comprehension to remove duplicates
     essential_genes = {gene.id for gene in model.essential_genes()}
    
     # Get essential_chokepoint_reactions
-    essential_CP = chokepoints.intersection(essential_genes)
+    essential_CP = list(chokepoints.intersection(essential_genes))
 
     if initial_args.verbosity > 0:
         print(f"{clrs['g']}Essential chokepoint genes...{clrs['n']}")
