@@ -176,10 +176,15 @@ def retrieve_targets(target_subdir: str, essential_CP: set[Gene]) -> None:
         print(f"Error message: {e}")
         exit(7)
 
+    if initial_args.verbosity > 0:
+        print(f"{clrs['g']}Retrieving targets sequences...{clrs['n']}")
+        print(f"Essential chokepoint genes: {essential_CP}")
+        print(f"Sequence records: {seqs}")
+
     # For each sequence in the input file
     for seq in seqs:
         # Parameterize the gene id
-        gene_id = seq.id.replace('|', '_')
+        gene_id = seq.id.replace('|', '_').replace('.', '_')
 
         # If the sequence is in the essential chokepoint genes list
         if gene_id in essential_CP: # TODO: make this more robust
